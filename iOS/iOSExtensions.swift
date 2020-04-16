@@ -39,13 +39,16 @@ extension Calendar {
     }
 }
 
-//  Two useful extensions for UIImages.  The first, cropSquare, does
+//  Three useful extensions for UIImages.  The first, cropSquare, does
 //  what its name implies; it crops the specified image into a square.
 //  The second, to CompressedJpegData, returns the raw jpeg data
 //  representation of the specified UIImage using the quality passed in
-//  as a parameter.  Useful for storing the image in a database.  For example:
+//  as a parameter.  Useful for storing the image in a database.  The third,
+//  resized(toSize) resizes the image it is called on to the specified size
+//  in the CGSize parameter.  For example:
 //  imageView.image = myImage.cropSquare()
 //  imageData = myImage.toCompressedJpegData(.mediumLow)
+//  imageView.image = myImage.resized(to size: CGSize(width: 650, height: 400)
 
 extension UIImage {
     func cropSquare() -> UIImage {
@@ -96,6 +99,13 @@ extension UIImage {
     
     func toCompressedJpegData(_ jpegQuality: JPEGQuality) -> Data? {
         return jpegData(compressionQuality: jpegQuality.rawValue)
+    }
+    
+    func resized(to size: CGSize) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image {_ in
+            self.draw(in: CGRect(origin: .zero, size: size)
+        )}
     }
 }
 
@@ -149,6 +159,21 @@ extension Data {
         bcf.allowedUnits = [.useMB, .useKB]
         bcf.countStyle = .file
         return bcf.string(fromByteCount: Int64(self.count))
+    }
+}
+
+//  Extension that allows you to initialize a regex (regular expression, a shorthand way to search/parse
+//  strings) with the required try/catch statements in the initializer.  For example:
+//  let regexPattern = "\\[|(drawing=[A-Za-z0-9-]+)|\\]"
+//  let regex = NSRegularExpression(regexPattern)
+
+extension NSRegularExpression {
+    convenience init(_ pattern: String) {
+        do {
+            try self.init(pattern: pattern)
+        } catch {
+            preconditionFailure("Illegal regular expression: \(pattern).")
+        }
     }
 }
 
